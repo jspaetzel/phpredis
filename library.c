@@ -2155,6 +2155,13 @@ redis_sock_create(char *host, int host_len, int port,
     if (persistent && persistent_id != NULL) {
         redis_sock->persistent_id = zend_string_init(persistent_id, strlen(persistent_id), 0);
     }
+    if (persistent && persistent_id == NULL && redis_sock->persistent_id == NULL) {
+        smart_str str = {0};
+        smart_str_appendl(&str, "conn:", sizeof("conn:") - 1);
+        smart_str_append_long(&str, (zend_long)php_rand());
+        smart_str_0(&str);
+        redis_sock->persistent_id = str.s;
+    }
 
     redis_sock->port    = port;
     redis_sock->timeout = timeout;

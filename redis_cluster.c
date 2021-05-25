@@ -156,6 +156,7 @@ zend_function_entry redis_cluster_functions[] = {
     PHP_ME(RedisCluster, getlasterror, arginfo_void, ZEND_ACC_PUBLIC)
     PHP_ME(RedisCluster, getmode, arginfo_void, ZEND_ACC_PUBLIC)
     PHP_ME(RedisCluster, getoption, arginfo_getoption, ZEND_ACC_PUBLIC)
+    PHP_ME(RedisCluster, getPersistentID, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(RedisCluster, getrange, arginfo_key_start_end, ZEND_ACC_PUBLIC)
     PHP_ME(RedisCluster, getset, arginfo_key_value, ZEND_ACC_PUBLIC)
     PHP_ME(RedisCluster, hdel, arginfo_key_members, ZEND_ACC_PUBLIC)
@@ -2001,6 +2002,21 @@ PHP_METHOD(RedisCluster, _redir) {
     } else {
         RETURN_NULL();
     }
+}
+
+PHP_METHOD(RedisCluster, getPersistentID) {
+    redisCluster *c = GET_CONTEXT();
+    redisClusterNode *node;
+
+    ZEND_HASH_FOREACH_PTR(c->nodes, node) {
+        if (node == NULL) break;
+        
+        if (node->sock->persistent_id) {
+            RETURN_STRINGL(ZSTR_VAL(node->sock->persistent_id), ZSTR_LEN(node->sock->persistent_id));
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    RETURN_NULL();
 }
 
 /*

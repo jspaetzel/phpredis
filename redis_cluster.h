@@ -295,5 +295,6 @@ PHP_METHOD(RedisCluster, _serialize);
 PHP_METHOD(RedisCluster, _unserialize);
 PHP_METHOD(RedisCluster, _masters);
 PHP_METHOD(RedisCluster, _redir);
+PHP_METHOD(RedisCluster, getPersistentID);
 
 #endif
