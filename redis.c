@@ -670,7 +670,7 @@ redis_sock_get(zval *id, int no_throw)
 }
 
 /**
- * redis_sock_get_direct
+ * redis_sock_get_connected
  * Returns our attached RedisSock pointer if we're connected
  */
 PHP_REDIS_API RedisSock *redis_sock_get_connected(INTERNAL_FUNCTION_PARAMETERS) {

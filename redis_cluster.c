@@ -462,6 +462,26 @@ void redis_cluster_load(redisCluster *c, char *name, int name_len) {
     if (pass) zend_string_release(pass);
 }
 
+/**
+ * redis_cluster_sock_get_connected
+ * Returns our attached RedisSock pointer if we're connected
+ */
+PHP_REDIS_API RedisSock *redis_cluster_sock_get_connected(INTERNAL_FUNCTION_PARAMETERS) {
+    RedisSock *redis_sock;
+
+    redisCluster *c = GET_CONTEXT();
+    redisClusterNode *node;
+
+    ZEND_HASH_FOREACH_PTR(c->nodes, node) {
+        if (node == NULL) break;
+
+        redis_sock = node->sock;
+    } ZEND_HASH_FOREACH_END();
+
+    /* Return our socket */
+    return redis_sock;
+}
+
 /*
  * PHP Methods
  */
@@ -2004,19 +2024,16 @@ PHP_METHOD(RedisCluster, _redir) {
     }
 }
 
+/* {{{ proto RedisCluster::getPersistentID */
 PHP_METHOD(RedisCluster, getPersistentID) {
-    redisCluster *c = GET_CONTEXT();
-    redisClusterNode *node;
+    RedisSock *redis_sock;
 
-    ZEND_HASH_FOREACH_PTR(c->nodes, node) {
-        if (node == NULL) break;
-        
-        if (node->sock->persistent_id) {
-            RETURN_STRINGL(ZSTR_VAL(node->sock->persistent_id), ZSTR_LEN(node->sock->persistent_id));
-        }
-    } ZEND_HASH_FOREACH_END();
-
-    RETURN_NULL();
+    if ((redis_sock = redis_cluster_sock_get_connected(INTERNAL_FUNCTION_PARAM_PASSTHRU)) == NULL) {
+        RETURN_FALSE;
+    } else if (redis_sock->persistent_id == NULL) {
+        RETURN_NULL();
+    }
+    RETURN_STRINGL(ZSTR_VAL(redis_sock->persistent_id), ZSTR_LEN(redis_sock->persistent_id));
 }
 
 /*
